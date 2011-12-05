@@ -36,62 +36,60 @@ db.wpbl.info
 # reverse IP address bytes
 convertIP()
 {
- set `IFS=".";echo $1`
- echo $4.$3.$2.$1
+    set `IFS=".";echo $1`
+    echo $4.$3.$2.$1
 }
 
 usage()
 {
- echo "Usage: $0 [-H <host>|-p]"
- echo " -H IP address to check"
- echo " -p Print list of DNSBLs"
- exit 3
+    echo "Usage: $0 [-H <host>|-p]"
+    echo " -H IP address to check"
+    echo " -p Print list of DNSBLs"
+    exit 3
 }
 
 # Checks the IP with list of DNSBL servers
 check()
 {
- for i in $DNSBLlist
- do
- if dig $ip_arpa.$i +short | grep -q "^127.0.0."
- then
- mail -s "** Service Alert: $ip found on $i **" $MAIL_RCPT <<!
- *** DNSBL WARNING ***
- Service: $progname
- Host: `hostname`
- Date/Time: `date`
- Additional Info: DNSBL-Alarm: $ip is listed on $i
+    for i in $DNSBLlist; do
+        if dig $ip_arpa.$i +short | grep -q "^127.0.0."; then
+            mail -s "** Service Alert: $ip found on $i **" $MAIL_RCPT <<!
+*** DNSBL WARNING ***
+Service: $progname
+Host: `hostname`
+Date/Time: `date`
+Additional Info: DNSBL-Alarm: $ip is listed on $i
 !
- fi
- done
- exit
+        fi
+    done
+    exit
 } # check
 
 case $1 in
- -H)
- if [ -z "$2" ]; then
- echo "ip address missing"
- exit
- fi
- ip=$2
- ip_arpa=`convertIP $ip`
- check;;
+    -H)
+        if [ -z "$2" ]; then
+            echo "ip address missing"
+            exit
+        fi
+        ip=$2
+        ip_arpa=`convertIP $ip`
+        check;;
 
- -p)
- for i in $DNSBLlist
- do
- echo $i
- done
- exit;;
+    -p)
+        for i in $DNSBLlist
+        do
+            echo $i
+        done
+        exit;;
 
- --help)
- usage
- exit;;
+    --help)
+        usage
+        exit;;
 
- *)
- if [ -z "$1" ]; then
- usage
- fi
- echo "unknown command: $1"
- exit;;
+    *)
+        if [ -z "$1" ]; then
+            usage
+        fi
+        echo "unknown command: $1"
+        exit;;
 esac
